@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import React, {useState} from 'react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
@@ -11,7 +11,7 @@ import {Building2, CheckCircle2, MapPin, Phone} from 'lucide-react';
 const api = {
   baseUrl: 'http://localhost:8000',
 
-  async firebaseAuthenticate(idToken, userType) {
+  async firebaseAuthenticate(idToken: string, userType: 'vendor' | 'customer') {
     const formData = new FormData();
     formData.append('id_token', idToken);
     formData.append('user_type', userType);
@@ -23,16 +23,7 @@ const api = {
     return response.json();
   },
 
-  async getUserInfo(token) {
-    const response = await fetch(`${this.baseUrl}/api/v1/account/user_info/`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    return response.json();
-  },
-
-  async getOnboardingStatus(token) {
+  async getOnboardingStatus(token: string) {
     const response = await fetch(`${this.baseUrl}/api/v1/vendor/onboarding-status/`, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -41,7 +32,7 @@ const api = {
     return response.json();
   },
 
-  async createVendor(token, data) {
+  async createVendor(token: string, data: any) {
     const response = await fetch(`${this.baseUrl}/api/v1/vendor/create/`, {
       method: 'POST',
       headers: {
@@ -53,7 +44,7 @@ const api = {
     return response.json();
   },
 
-  async updateVendor(token, data) {
+  async updateVendor(token: string, data: any) {
     const response = await fetch(`${this.baseUrl}/api/v1/vendor/update/`, {
       method: 'PATCH',
       headers: {
@@ -65,27 +56,7 @@ const api = {
     return response.json();
   },
 
-  async getShopTypes() {
-    const response = await fetch(`${this.baseUrl}/api/v1/vendor/shop-types/`);
-    return response.json();
-  },
-
-  async getCountries() {
-    const response = await fetch(`${this.baseUrl}/api/v1/location/countries/`);
-    return response.json();
-  },
-
-  async getStates(countryId) {
-    const response = await fetch(`${this.baseUrl}/api/v1/location/states/?country=${countryId}`);
-    return response.json();
-  },
-
-  async getDistricts(stateId) {
-    const response = await fetch(`${this.baseUrl}/api/v1/location/districts/?state=${stateId}`);
-    return response.json();
-  },
-
-  async createBranch(token, data) {
+  async createBranch(token: string, data: any) {
     const response = await fetch(`${this.baseUrl}/api/v1/vendor/branches/`, {
       method: 'POST',
       headers: {
@@ -99,20 +70,17 @@ const api = {
 };
 
 export default function VendorLoginFlow() {
-  const [currentView, setCurrentView] = useState('login'); // login, signup, wizard, dashboard
-  const [wizardStep, setWizardStep] = useState(1);
-  const [authToken, setAuthToken] = useState('');
-  const [userInfo, setUserInfo] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [currentView, setCurrentView] = useState<string>('login'); // login, signup, wizard, dashboard
+  const [wizardStep, setWizardStep] = useState<number>(1);
+  const [authToken, setAuthToken] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
 
   // Form states
-  const [loginForm, setLoginForm] = useState({email: '', password: ''});
-  const [signupForm, setSignupForm] = useState({email: '', phone: '', password: ''});
-  const [otpForm, setOtpForm] = useState({otp: ''});
+  const [loginForm, setLoginForm] = useState<{email: string; password: string}>({email: '', password: ''});
 
   // Wizard form states
-  const [locationForm, setLocationForm] = useState({
+  const [locationForm, setLocationForm] = useState<any>({
     shopType: '',
     businessType: '',
     country: '',
@@ -128,7 +96,7 @@ export default function VendorLoginFlow() {
     keyPersonContact: ''
   });
 
-  const [contactForm, setContactForm] = useState({
+  const [contactForm, setContactForm] = useState<any>({
     landPhone: '',
     registeredAddress: '',
     addressLine2: '',
@@ -139,7 +107,13 @@ export default function VendorLoginFlow() {
     youtube: ''
   });
 
-  const [storeForm, setStoreForm] = useState({
+  const [storeForm, setStoreForm] = useState<{
+    workingHoursFrom: string;
+    workingHoursTo: string;
+    homeDelivery: boolean;
+    logo: File | null;
+    storePhoto: File | null;
+  }>({
     workingHoursFrom: '',
     workingHoursTo: '',
     homeDelivery: false,
@@ -173,10 +147,9 @@ export default function VendorLoginFlow() {
       const mockToken = 'mock_firebase_token_' + Date.now();
 
       // Authenticate with backend
-      const authResult = await api.firebaseAuthenticate(mockToken, 'vendor');
+      await api.firebaseAuthenticate(mockToken, 'vendor');
 
       setAuthToken(mockToken);
-      setUserInfo(authResult);
 
       // Check onboarding status
       const onboardingStatus = await api.getOnboardingStatus(mockToken);
@@ -186,15 +159,16 @@ export default function VendorLoginFlow() {
       } else {
         setCurrentView('wizard');
       }
-    } catch (err) {
-      setError('Login failed. Please try again.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Login failed. Please try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
   // Handle email/password login
-  const handleEmailLogin = async (e) => {
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -210,8 +184,9 @@ export default function VendorLoginFlow() {
       } else {
         setCurrentView('wizard');
       }
-    } catch (err) {
-      setError('Invalid credentials');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Invalid credentials';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -245,8 +220,9 @@ export default function VendorLoginFlow() {
       }
 
       setWizardStep(wizardStep + 1);
-    } catch (err) {
-      setError('Failed to save. Please try again.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to save. Please try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -401,7 +377,7 @@ export default function VendorLoginFlow() {
                       <FieldLabel>Shop Type</FieldLabel>
                       <Select
                         value={locationForm.shopType}
-                        onValueChange={(val) => setLocationForm({...locationForm, shopType: val})}
+                        onValueChange={(val: string) => setLocationForm({...locationForm, shopType: val})}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select shop type"/>
@@ -418,7 +394,7 @@ export default function VendorLoginFlow() {
                       <FieldLabel>Business Type</FieldLabel>
                       <Select
                         value={locationForm.businessType}
-                        onValueChange={(val) => setLocationForm({...locationForm, businessType: val})}
+                        onValueChange={(val: string) => setLocationForm({...locationForm, businessType: val})}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select business type"/>
@@ -437,7 +413,7 @@ export default function VendorLoginFlow() {
                       <FieldLabel>Country</FieldLabel>
                       <Select
                         value={locationForm.country}
-                        onValueChange={(val) => setLocationForm({...locationForm, country: val})}
+                        onValueChange={(val: string) => setLocationForm({...locationForm, country: val})}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select country"/>
@@ -454,7 +430,7 @@ export default function VendorLoginFlow() {
                       <FieldLabel>State</FieldLabel>
                       <Select
                         value={locationForm.state}
-                        onValueChange={(val) => setLocationForm({...locationForm, state: val})}
+                        onValueChange={(val: string) => setLocationForm({...locationForm, state: val})}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select state"/>
@@ -471,7 +447,7 @@ export default function VendorLoginFlow() {
                       <FieldLabel>District</FieldLabel>
                       <Select
                         value={locationForm.district}
-                        onValueChange={(val) => setLocationForm({...locationForm, district: val})}
+                        onValueChange={(val: string) => setLocationForm({...locationForm, district: val})}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select district"/>
@@ -679,7 +655,7 @@ export default function VendorLoginFlow() {
                     <Input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => setStoreForm({...storeForm, logo: e.target.files[0]})}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStoreForm({...storeForm, logo: e.target.files?.[0] || null})}
                     />
                     <FieldDescription>Upload your store logo</FieldDescription>
                   </Field>
@@ -689,7 +665,7 @@ export default function VendorLoginFlow() {
                     <Input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => setStoreForm({...storeForm, storePhoto: e.target.files[0]})}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStoreForm({...storeForm, storePhoto: e.target.files?.[0] || null})}
                     />
                     <FieldDescription>Upload a photo of your store</FieldDescription>
                   </Field>

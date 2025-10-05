@@ -92,8 +92,8 @@ export function LoginForm({className, ...props}: ComponentProps<"div">) {
         const error = err as FirebaseError;
         // If backend indicates this is a new user, redirect to sign up
         if (error.message?.includes('Password is required for email sign up')) {
-          navigate('/sign-up', {
-            state: {
+          navigate('/sign-up', { 
+            state: { 
               email: formData.email,
               idToken: idToken
             }
@@ -139,8 +139,8 @@ export function LoginForm({className, ...props}: ComponentProps<"div">) {
         const error = err as FirebaseError;
         // If backend indicates this is a new user, redirect to sign up
         if (error.message?.includes('Password is required for email sign up')) {
-          navigate('/sign-up', {
-            state: {
+          navigate('/sign-up', { 
+            state: { 
               email: result.user.email,
               idToken: idToken
             }

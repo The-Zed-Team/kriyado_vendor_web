@@ -20,4 +20,25 @@ export default defineConfig({
             },
         },
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks(id: string) {
+                    if (id.includes('node_modules')) {
+                        if (id.includes('lucide-react') || id.includes('react-icons')) {
+                            return 'icons';
+                        }
+                        if (id.includes('react') || id.includes('react-dom')) {
+                            return 'react-vendor';
+                        }
+                        // separate large third-party libs if needed
+                        if (id.includes('date-fns') || id.includes('moment') || id.includes('lodash')) {
+                            return 'lib-vendor';
+                        }
+                        return 'vendor';
+                    }
+                }
+            }
+        }
+    }
 })

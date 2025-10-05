@@ -1,7 +1,9 @@
-import React, {createContext, type ReactNode, useContext} from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import {createContext, type ReactNode, useContext} from 'react';
 import {useVendorAuth} from '../hooks/useVendorAuth';
-import type {OnboardingStatus, UserInfo, VendorDetails} from '../services/vendorAuthService';
-import { getAuth } from 'firebase/auth';
+import type {UserInfo, VendorDetails, FirebaseAuthResponse} from '../services/vendorAuthService';
+import type { OnboardingStatus } from '../services/vendorAuthService';
+import {getAuth} from 'firebase/auth';
 
 // Shared types
 export interface VendorProfile {
@@ -17,17 +19,17 @@ interface AuthContextType {
   token: string | null;
   user: UserInfo | null;
   vendor: VendorDetails | null;
-  onboardingStatus: string | null;
+  onboardingStatus: OnboardingStatus | null;
   loading: boolean;
   error: string | null;
   isAuthenticated: boolean;
   isOnboarded: boolean;
-  loginWithFirebase: (idToken: string) => Promise<void>;
+  loginWithFirebase: (idToken: string) => Promise<FirebaseAuthResponse>;
   logout: () => void;
   refreshUser: () => Promise<void>;
   updateVendorData: (vendor: VendorDetails) => void;
   clearError: () => void;
-  updateVendorProfile: (profile: VendorProfile) => Promise<void>;
+  updateVendorProfile: (profile: VendorProfile) => Promise<VendorDetails>;
 }
 
 // Create context with undefined default value
@@ -43,7 +45,7 @@ export function useAuth() {
 }
 
 // Auth provider component
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({children}: { children: ReactNode }) {
   const auth = useVendorAuth();
   const firebaseAuth = getAuth();
 
@@ -78,8 +80,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         is_onboarded: true
       });
 
-      // Return the updated data
-      return updatedData;
+      // Return the updated vendor details
+      return updatedData as VendorDetails;
     } catch (error) {
       console.error('Error updating vendor profile:', error);
       throw error;

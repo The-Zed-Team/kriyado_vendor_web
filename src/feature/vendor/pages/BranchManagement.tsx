@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useCallback} from 'react';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import {useAuth} from '@/feature/auth/context/AuthContext.js';
@@ -6,29 +6,39 @@ import vendorAuthService from '@/feature/auth/services/vendorAuthService';
 import {Edit, MapPin, Phone, Plus, Trash2} from 'lucide-react';
 import {Alert, AlertDescription} from '@/components/ui/alert';
 
+interface Branch {
+    id: string;
+    shop_locality?: string;
+    nearby_town?: string;
+    pin_code?: string;
+    key_person_contact_number?: string;
+    key_person_name?: string;
+}
+
 export function BranchManagement() {
     const {token} = useAuth();
-    const [branches, setBranches] = useState([]);
+    const [branches, setBranches] = useState<Branch[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        loadBranches();
-    }, []);
-
-    const loadBranches = async () => {
+    const loadBranches = useCallback(async () => {
         if (!token) return;
 
         try {
             setLoading(true);
             const data = await vendorAuthService.getBranches(token);
-            setBranches(data);
-        } catch (err: any) {
-            setError(err.message || 'Failed to load branches');
+            setBranches(data as Branch[]);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Failed to load branches';
+            setError(message);
         } finally {
             setLoading(false);
         }
-    };
+    }, [token]);
+
+    useEffect(() => {
+        void loadBranches();
+    }, [loadBranches]);
 
     const handleDelete = async (branchId: string) => {
         if (!token || !confirm('Are you sure you want to delete this branch?')) return;
@@ -36,8 +46,9 @@ export function BranchManagement() {
         try {
             await vendorAuthService.deleteBranch(token, branchId);
             await loadBranches();
-        } catch (err: any) {
-            setError(err.message || 'Failed to delete branch');
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Failed to delete branch';
+            setError(message);
         }
     };
 
@@ -82,7 +93,7 @@ export function BranchManagement() {
                 </Card>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {branches.map((branch: any) => (
+                    {branches.map((branch: Branch) => (
                         <Card key={branch.id}>
                             <CardHeader>
                                 <div className="flex justify-between items-start">
