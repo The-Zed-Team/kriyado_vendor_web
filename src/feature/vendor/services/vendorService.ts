@@ -32,7 +32,7 @@ export const BUSINESS_TYPE_CHOICES = [
 
 class VendorService {
   async getShopTypes(): Promise<ShopType[]> {
-    const response = await fetch('/api/v1/shop-types/');
+    const response = await fetch('/api/v1/vendor/shop-types/');
     if (!response.ok) {
       throw new Error('Failed to fetch shop types');
     }
