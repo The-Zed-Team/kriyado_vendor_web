@@ -7,9 +7,9 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/c
 import {Textarea} from '@/components/ui/textarea';
 import {Building2, CheckCircle2, MapPin, Phone} from 'lucide-react';
 
-// Mock API service
+// Mock API serviceF
 const api = {
-  baseUrl: 'http://localhost:8000',
+  baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
 
   async firebaseAuthenticate(idToken: string, userType: 'vendor' | 'customer') {
     const formData = new FormData();
