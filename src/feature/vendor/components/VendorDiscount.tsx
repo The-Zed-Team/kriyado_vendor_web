@@ -314,3 +314,5 @@ export function VendorDiscount() {
     </div>
   );
 }
+
+export default VendorDiscount;

@@ -143,3 +143,5 @@ export function VendorDeclaration() {
     </div>
   );
 }
+
+export default VendorDeclaration;

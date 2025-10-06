@@ -490,3 +490,5 @@ export function BranchManagementFull() {
     </div>
   );
 }
+
+export default BranchManagementFull;
