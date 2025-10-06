@@ -32,7 +32,7 @@ const api = {
     return response.json();
   },
 
-  async createVendor(token: string, data: any) {
+  async createVendor(token: string, data: Record<string, unknown>) {
     const response = await fetch(`${this.baseUrl}/api/v1/vendor/create/`, {
       method: 'POST',
       headers: {
@@ -44,7 +44,7 @@ const api = {
     return response.json();
   },
 
-  async updateVendor(token: string, data: any) {
+  async updateVendor(token: string, data: Record<string, unknown>) {
     const response = await fetch(`${this.baseUrl}/api/v1/vendor/update/`, {
       method: 'PATCH',
       headers: {

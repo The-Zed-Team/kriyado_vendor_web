@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 export interface ShopType {
   id: string;
   name: string;
@@ -32,68 +34,59 @@ export const BUSINESS_TYPE_CHOICES = [
 
 class VendorService {
   async getShopTypes(): Promise<ShopType[]> {
-    const response = await fetch('/api/v1/vendor/shop-types/');
-    if (!response.ok) {
-      throw new Error('Failed to fetch shop types');
-    }
-    return response.json();
+    const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/v1/vendor/shop-types/`);
+    return response.data;
   }
 
   async createVendor(vendorData: VendorProfile, idToken: string): Promise<VendorProfile> {
     if (!idToken) {
       throw new Error('Firebase token is required');
     }
-
-    const response = await fetch('/api/v1/vendor/create/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`,
-      },
-      body: JSON.stringify(vendorData),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.detail || 'Failed to create vendor profile');
+    try {
+      const response = await axios.post('/api/v1/vendor/create/', vendorData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+      });
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.detail || 'Failed to create vendor profile');
+      }
+      throw new Error('Failed to create vendor profile');
     }
-
-    return data;
   }
 
   async updateVendor(vendorData: Partial<VendorProfile>, idToken: string): Promise<VendorProfile> {
-    const response = await fetch('/api/v1/vendor/update/', {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`,
-      },
-      body: JSON.stringify(vendorData),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to update vendor profile');
+    try {
+      const response = await axios.patch('/api/v1/vendor/update/', vendorData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+      });
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to update vendor profile');
+      }
+      throw new Error('Failed to update vendor profile');
     }
-
-    return response.json();
   }
 
   async getOnboardingStatus(idToken: string): Promise<VendorOnboardingStatus> {
-    const response = await fetch('/api/v1/vendor/onboarding-status/', {
-      headers: {
-        'Authorization': `Bearer ${idToken}`,
-      },
-    });
-
-    if (!response.ok) {
+    try {
+      const response = await axios.get('/api/v1/vendor/onboarding-status/', {
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+        },
+      });
+      return response.data;
+    } catch {
       throw new Error('Failed to fetch onboarding status');
     }
-
-    return response.json();
   }
 }
 
 export const vendorService = new VendorService();
-
