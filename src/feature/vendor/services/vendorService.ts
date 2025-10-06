@@ -26,10 +26,10 @@ export interface VendorOnboardingStatus {
 }
 
 export const BUSINESS_TYPE_CHOICES = [
-  { value: "Wholesale", label: "Wholesale" },
-  { value: "Retail", label: "Retail" },
-  { value: "Wholesale & Retail", label: "Wholesale & Retail" },
-  { value: "Service based", label: "Service based" },
+  {value: "Wholesale", label: "Wholesale"},
+  {value: "Retail", label: "Retail"},
+  {value: "Wholesale & Retail", label: "Wholesale & Retail"},
+  {value: "Service based", label: "Service based"},
 ] as const;
 
 class VendorService {
@@ -52,11 +52,20 @@ class VendorService {
       return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        throw new Error(error.response?.data?.detail || 'Failed to create vendor profile');
+        const data = error.response?.data;
+
+        // Handle non_field_errors
+        if (data?.non_field_errors && Array.isArray(data.non_field_errors)) {
+          throw new Error(data.non_field_errors.join(" "));
+        }
+
+        // Fallback for field-specific or general error
+        throw new Error(data?.detail || 'Failed to create vendor profile');
       }
       throw new Error('Failed to create vendor profile');
     }
   }
+
 
   async updateVendor(vendorData: Partial<VendorProfile>, idToken: string): Promise<VendorProfile> {
     try {
